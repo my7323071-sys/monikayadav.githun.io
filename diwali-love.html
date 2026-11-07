@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hamari Diwali ❤️</title>
+<style>
+*{ touch-action:none; }
+body{ text-align:center; background:#1a0033; color:white; font-family:Arial; margin:0; overflow:hidden; }
+h1{ color:#ffcc00; font-size:21px; margin:10px 0 2px 0; }
+#scoreBox{ font-size:18px; color:#ff99cc; }
+#shayariBox{ background:#fff0f5; color:#800040; margin:10px 15px; padding:12px; border-radius:15px; min-height:55px; font-size:16px; font-style:italic; border:2px solid gold; }
+#game{ width:100vw; height:48vh; background:#2b0057; border-top:3px solid gold; border-bottom:3px solid gold; position:relative; overflow:hidden; }
+#plate{ position:absolute; bottom:8px; left:40%; font-size:52px; }
+.fall{ position:absolute; font-size:36px; }
+button{ background:#ffcc00; border:none; padding:13px 28px; font-size:18px; border-radius:30px; cursor:pointer; font-weight:bold; margin-top:10px; }
+#shareBtn{ background:#25D366; color:white; display:none; }
+#hint{ font-size:13px; color:#ccc; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<h1>🪔 Meri Diwali, Sirf Tum 🪔</h1>
+<p id="scoreBox">Diye: <span id="s">0</span> / 10 &nbsp; | &nbsp; Score: <span id="sc">0</span></p>
+
+<div id="shayariBox">Diya pakdo, aur meri shayari padho... ❤️</div>
+
+<div id="game">
+  <div id="plate">🪔</div>
+</div>
+
+<button id="startBtn" onclick="startGame()">▶️ GAME START KARO</button>
+<button id="shareBtn" onclick="shareScore()">💚 Score BF ko WhatsApp par Bhejo</button>
+<p id="hint">👆 Ungli se plate ko chalao<br>🪔 Diya = +10 &nbsp; 🧨 Patakha = Game Over</p>
+
+<script>
+let score=0, diya=0, gameOn=false;
+let plate=document.getElementById("plate");
+let game=document.getElementById("game");
+
+// YAHAN TUM APNI SHAYARI BADAL SAKTI HO
+let shayari = [
+  "Teri muskaan se roshan hai meri Diwali, tu jo mile toh lagta hai mil gayi har khushi ❤️",
+  "Diye toh har saal jalte hai, par meri Diwali toh tab hai jab tu saath hota hai 🪔",
+  "Tu chand nahi, par meri raaton ki roshni tu hi hai, meri har dua me bas tu hi tu hai ✨",
+  "Is Diwali bas ek hi dua mangi hai, har Diwali tu mere saath ho, haath me tera haath ho 💕",
+  "Log patakhe jalate hai shor ke liye, main diya jalati hu bas teri ek muskaan ke liye 😍",
+  "Tere bina Diwali adhoori si lagti hai, tu aaye toh lagta hai tyohar aa gaya 🪔❤️",
+  "Na chahiye mujhe duniya ki daulat, bas tu saath ho toh har din Diwali hai 💖",
+  "Teri yaadon ka diya har pal jalta hai, tu door hoke bhi dil ke paas rehta hai ✨",
+  "Is baar Diwali par patakha nahi, tera haath pakad kar saath chalna hai mujhe 🫶",
+  "Tu meri zindagi ka sabse pyara diya hai, jise main hamesha sambhal kar rakhungi ❤️🪔"
+];
+
+game.addEventListener("touchmove", function(e){
+  e.preventDefault();
+  let x = e.touches[0].clientX - game.getBoundingClientRect().left;
+  plate.style.left = Math.max(0, Math.min(window.innerWidth-55, x-25))+"px";
+}, {passive:false});
+
+function startGame(){
+  score=0; diya=0; gameOn=true;
+  document.getElementById("s").innerText=0;
+  document.getElementById("sc").innerText=0;
+  document.getElementById("shayariBox").innerText="Chalo shuru karte hai meri jaan... ❤️";
+  document.getElementById("startBtn").style.display="none";
+  document.getElementById("shareBtn").style.display="none";
+  setInterval(createItem, 800);
+}
+
+function createItem(){
+  if(!gameOn) return;
+  let item=document.createElement("div");
+  item.className="fall";
+  let isBomb = Math.random() < 0.2;
+  item.innerText = isBomb ? "🧨" : "🪔";
+  item.style.left = Math.random()*(window.innerWidth-40)+"px";
+  item.style.top="0px";
+  game.appendChild(item);
+
+  let fall=setInterval(function(){
+    let top=item.offsetTop+4;
+    item.style.top=top+"px";
+    let gameH = game.offsetHeight;
+
+    if(top > gameH-75 && top < gameH-20 && Math.abs(item.offsetLeft - plate.offsetLeft)<35){
+      clearInterval(fall); item.remove();
+      if(!isBomb){
+        score+=10; diya++;
+        document.getElementById("s").innerText=diya;
+        document.getElementById("sc").innerText=score;
+        // Har diye par nayi shayari
+        document.getElementById("shayariBox").innerText = "🪔 Diya " + diya + ":\n" + shayari[diya-1];
+        if(diya>=10){
+          gameOn=false;
+          document.getElementById("shayariBox").innerText = "🎉 TUMNE 10 DIYE PAKAD LIYE! \nMeri taraf se tumhe ye Diwali Mubarak, meri jaan! Ab ye score apne BF ko bhejo ❤️";
+          document.getElementById("shareBtn").style.display="inline-block";
+          document.getElementById("startBtn").style.display="inline-block";
+          document.getElementById("startBtn").innerText="🔁 Phir Se Khelo";
+        }
+      } else {
+        gameOn=false;
+        document.getElementById("shayariBox").innerText="Hayee! Patakha lag gaya 💥 Phir se try karo meri jaan!";
+        document.getElementById("startBtn").style.display="inline-block";
+        document.getElementById("startBtn").innerText="🔁 Phir Se Khelo";
+      }
+    }
+    if(top > gameH){ clearInterval(fall); item.remove(); }
+  },25);
+}
+
+function shareScore(){
+  let text = "🪔 Happy Diwali Meri Jaan! ❤️\n\nMaine Hamari Diwali Game me " + diya + " diye pakde aur Score banaya: " + score + "\n\nAb tumhari baari hai! Kya tum mujhse zyada diye pakad paoge? 😍\n\nGame khelo yahan: " + window.location.href + "\n\nTumhari shayari ka intezaar rahega 💕";
+  let url = "https://wa.me/?text=" + encodeURIComponent(text);
+  window.open(url, "_blank");
+}
+</script>
+</body>
+</html>
